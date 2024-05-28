@@ -1,0 +1,341 @@
+import { Button, VerticalBox, TextEdit, LineEdit } from "std-widgets.slint";
+
+enum Page {
+    Menu,
+    Encode,
+    Decode,
+    Key
+}
+
+
+export component AppWindow inherits Window {
+    title: "Ghost Text";
+    width:660px;
+
+    callback encode(string);
+    callback decode(string);
+    callback set_key_msg(string);
+    callback exit();
+
+    property <Page> current_view: Page.Menu;
+    in property <string> main_error_field;
+    in property <string> decoding_field;
+    in property <string> encoding_field;
+    in property <string> decoding_field_2;
+    in property <string> encoding_field_2;
+    in property <string> key_field;
+    in-out property <string> key_message: "Current Key";
+    in-out property <string> key_value: "None";
+    in-out property <string> cloni;
+    in-out property <string> cloni_2;
+    
+    
+    VerticalBox {
+        padding-left: 20px;
+        padding-right: 20px;
+
+        if (current_view == Page.Menu) : VerticalBox {
+            Text {
+                text: "Protect your texts online";
+                horizontal-alignment: center;
+                font-size: 30px;
+            }
+
+            Text {
+                wrap: word-wrap;
+                text: "Usage:\n\n1. If using first time enter a new Security Key. Using default one is not secure!\n  → Security Key is saved unecrypted in home folder as .passkey file\n2. Press Encrypt Text, insert your text and encrypt it using AES-256-CBC\n3. Share encrypted message with someone with same Security key\n4. Decrypt it using - Decrypt Text - menu and enjoy privacy on social networks!";
+                horizontal-alignment: left;
+                font-size: 15px;
+            }
+
+            Text {
+                wrap: word-wrap;
+                text: main_error_field;
+                horizontal-alignment: left;
+                font-size: 15px;
+                color: orange;
+            }
+
+            VerticalBox {
+                spacing: 15px;
+                    
+                Button {
+                    text: "Encrypt Text";
+                    height: 40px;
+                    primary: true;
+                    clicked => {
+                        root.current_view = Page.Encode;
+                    }     
+                }
+
+                Button {
+                    text: "Decrypt Text";
+                    height: 40px;
+                    clicked => {
+                        root.current_view = Page.Decode;
+                    }
+                    
+                }
+
+                Button {
+                    text: "Enter Key";
+                    height: 40px;
+                    clicked => {
+                        root.current_view = Page.Key;
+                    }
+                    
+                }
+
+                Button {
+                    text: "Exit";
+                    height: 40px;
+                    clicked => {
+                        root.exit()
+                    }
+                }
+            }
+
+            Text {
+                text: "Suomi422 ❤";
+                horizontal-alignment: right;
+                font-size: 8px;
+            }
+        }
+
+
+
+        if (current_view == Page.Encode) : VerticalBox {
+            alignment: center;
+
+            Text {
+                text: "Encrypt Menu";
+                horizontal-alignment: center;
+                font-size: 30px;
+            }
+
+            Rectangle {
+                width: root.width / 1.115;
+                height: root.height / 4.7;
+        
+        
+                encoding_field := TextEdit {
+                    font-size: 15px;
+                    width: parent.width;
+                    height: parent.height;
+                    text: "";
+                }
+        
+                Text {
+                    text: "Enter text here...";
+                    color: #888;
+                    visible: encoding_field.text == "";
+                    vertical-alignment: center;
+                    horizontal-alignment: left;
+                }
+            }
+
+            decoding_field := TextEdit {
+                font-size: 15px;
+                width: root.width / 1.115;
+                height: root.height / 4.7;
+                text: root.cloni;
+                read-only: true;
+            }
+
+            GridLayout {
+                spacing: 10px;
+                Button {
+                    text: "Copy";
+                    height: 40px;
+                    clicked => {
+                        decoding-field.select-all();
+                        decoding-field.copy();
+                    }
+                }
+        
+                Button {
+                    text: "Paste";
+                    height: 40px;
+                    clicked => {
+                        encoding-field.select-all();
+                        encoding-field.paste();
+                    }
+                    
+                } 
+            }
+
+            Button {
+                text: "Encrypt";
+                height: 40px;
+                primary: true;
+                clicked => {
+                    root.encode(encoding-field.text);
+                }
+            }
+
+            Button {
+                text: "Menu";
+                height: 40px;
+                clicked => {
+                    root.cloni = "";
+                    root.current_view = Page.Menu;
+                }
+            }
+
+        }
+
+
+        if (current_view == Page.Decode) : VerticalBox {
+            alignment: center;
+            Text {
+                text: "Decrypt Menu";
+                horizontal-alignment: center;
+                font-size: 30px;
+            }
+
+
+            Rectangle {
+                width: root.width / 1.115;
+                height: root.height / 4.7;
+        
+                encoding_field_2 := TextEdit {
+                    font-size: 15px;
+                    width: root.width / 1.115;
+                    height: root.height / 4.7;
+                    text: "";
+
+                }
+        
+                Text {
+                    text: "Enter text here...";
+                    color: #888;
+                    visible: encoding_field_2.text == "";
+                    vertical-alignment: center;
+                    horizontal-alignment: left;
+                }
+            }
+
+            decoding_field_2 := TextEdit {
+                font-size: 15px;
+                width: root.width / 1.115;
+                height: root.height / 4.7;
+                read-only: true;
+                text: root.cloni_2;
+            }
+
+            GridLayout {
+                spacing: 10px;
+                Button {
+                    text: "Copy";
+                    height: 40px;
+                    clicked => {
+                        decoding-field_2.select-all();
+                        decoding-field_2.copy();
+                    }
+                }
+        
+                Button {
+                    text: "Paste";
+                    height: 40px;
+                    clicked => {
+                        encoding-field_2.select-all();
+                        encoding-field_2.paste();
+                    }
+                    
+                } 
+            }
+
+            Button {
+                text: "Decrypt";
+                primary: true;
+                height: 40px;
+                clicked => {
+                    root.decode(encoding-field_2.text);
+                }
+            }
+
+            Button {
+                text: "Menu";
+                height: 40px;
+                clicked => {
+                    root.cloni_2 = "";
+                    root.current_view = Page.Menu;
+                }
+                
+            }
+        }
+
+
+        if (current_view == Page.Key) : VerticalBox {
+            alignment: center;
+
+            Text {
+                text: "Key Registration";
+                horizontal-alignment: center;
+                font-size: 30px;
+            }
+
+            Text {
+                text: "Key must have exactly 32 characters. If less is inputed, rest will be generated randomly. If more, rest is cutted off.";
+                horizontal-alignment: center;
+                font-size: 15px;
+                wrap: word-wrap;
+            }
+            
+            key_field := LineEdit {
+                horizontal-alignment: center;
+                font-size: 20px;
+                width: root.width / 1.115;
+                height: root.height / 8;
+                text: "";
+
+            }
+
+            Button {
+                text: "Register";
+                height: 40px;
+                primary: true;
+                clicked => {
+                    root.set_key_msg(key-field.text);
+                }
+            }
+            
+            VerticalBox {
+                height: 10px;
+            }
+
+            Text {
+                text: key_message;
+                horizontal-alignment: center;
+                font-size: 20px;
+            }
+
+            keyField := LineEdit {
+                text: key_value;
+                horizontal-alignment: center;
+                font-size: 15px;
+                read-only: true;
+            }
+
+            Button {
+                text: "Copy";
+                height: 40px;
+                primary: true;
+                clicked => {
+                    keyField.select-all();
+                    keyField.copy();
+                }
+            }
+
+            Button {
+                text: "Menu";
+                height: 40px;
+                clicked => {
+                    key_message = "Current Key";
+                    root.current_view = Page.Menu;
+                }
+                
+            }
+        }
+    }
+}
