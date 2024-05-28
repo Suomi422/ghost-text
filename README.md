@@ -22,3 +22,5 @@ Instructions are here:
    cargo build --release
    ```
 After that executable file will be located in `target/release` directory of the repository.
+
+[Usage Example.webm](https://github.com/Suomi422/ghost-text/assets/170992784/8f73ec3d-bbc9-4580-b3f1-90e64d7c7349)
