@@ -12,15 +12,30 @@ In easy words: Let's use resources and pay nothing. Because it's time to revenge
 Tool has simple GUI and needs a "Secret Key" to encrypt/decrypt messages using AES-256 encryption provided by Crates inside of source files.
 Mainly created for Linux, but will work also in Mac. Because Nobody cares about Windows.
 
-For now there is only a source, so you will need to build and run it by yourself.
-Instructions are here:
+
+Build Instructions:
 1. Firsty download and install Rust (if you do not have it) using official [Rust Homepage](https://www.rust-lang.org/tools/install).
 2. Clone code from this repository using `git clone` command.
-3. use `cd` command to move inside of this repository (directory name is: "ghost-text")
-4. Build project using the command bellow (This will build software as "Release version")
+3. Open terminal in the cloned directory (name: ghost-text)
+4. Build project using the command bellow (This will build software as "Release")
    ```
    cargo build --release
    ```
+
 After that executable file will be located in `target/release` directory of the repository.
+
+*Or just run debug version using
+   ```
+   cargo run
+   ```
+
+
+### Pre-built version can be executed as bellow
+
+   ```
+   chmod u+x
+   ./GhostText 
+   ```
+
 
 [Usage Example.webm](https://github.com/Suomi422/ghost-text/assets/170992784/8f73ec3d-bbc9-4580-b3f1-90e64d7c7349)
