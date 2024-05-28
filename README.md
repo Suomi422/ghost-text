@@ -33,7 +33,7 @@ After that executable file will be located in `target/release` directory of the 
 ### Pre-built version can be executed as bellow
 
    ```
-   chmod u+x
+   chmod u+x GhostText
    ./GhostText 
    ```
 
