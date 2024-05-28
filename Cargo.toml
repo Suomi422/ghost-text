@@ -1,0 +1,18 @@
+[package]
+name = "ghost-text"
+version = "0.1.0"
+authors = ["Suomi422"]
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+slint = "1.5"
+aes = "0.8.4"
+base64 = "0.22.1"
+bytebuffer = "2.2.0"
+cbc = { version = "0.1.2", features = ["std"] }
+rand = "0.8.5"
+dirs = "5.0.0"
+
+[build-dependencies]
+slint-build = "1.5"
