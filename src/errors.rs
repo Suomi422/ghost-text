@@ -6,10 +6,13 @@ pub enum LibraryErrors {
     UTF8Error,
     ValueError,
     PermissionError,
-    FileError,
+    KeyFileError,
     PlatformError,
     NoOperationTypeError,
-    FileNameError
+    KeyFileNameError,
+    BinaryFileDecryptingError,
+    BinaryFileReadError,
+    BinaryFileWriteError,
 }
 
 
@@ -29,10 +32,13 @@ impl EncryptorError {
             LibraryErrors::UTF8Error => String::from("Could not parse decoded data to UTF-8"),
             LibraryErrors::ValueError => String::from("Value is not usable"),
             LibraryErrors::PermissionError => String::from("Unable to create/read a key file. Make sure program has permissions to home folder"),
-            LibraryErrors::FileError => String::from("Unable to write a key file. Make sure data are right and file exists"),
+            LibraryErrors::KeyFileError => String::from("Unable to write a key file. Make sure data are right and file exists"),
             LibraryErrors::PlatformError => String::from("Unable to get home directory. Not supported platform"),
             LibraryErrors::NoOperationTypeError => String::from("No operation type was set"),
-            LibraryErrors::FileNameError => String::from("Secret Key filename must have more than 3 characters"),
+            LibraryErrors::KeyFileNameError => String::from("Secret Key filename must have more than 3 characters"),
+            LibraryErrors::BinaryFileDecryptingError => String::from("File set for decoding is corrupted or Secret key is wrong"),
+            LibraryErrors::BinaryFileReadError => String::from("Could not open/read the file"),
+            LibraryErrors::BinaryFileWriteError => String::from("Could not create encrypted file. Make sure program has rights to writing"),
         };
 
         EncryptorError {
