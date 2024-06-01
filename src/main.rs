@@ -204,10 +204,35 @@ fn main() -> Result<(), slint::PlatformError> {
         let mut decrypter = Secret::init(shared_key_for_decode_binary.borrow().clone(), OperationType::Decrypt);
         let decrypted_bytes = decrypter.generate_bytes(file_bytes.unwrap());
 
-        path.set_extension(format!("{}.{}", path.extension().unwrap_or_default().to_str().unwrap_or(""), "dec"));
+        // remove ".enc"
+        path.set_extension("");
+        
+        let file_name = path.file_name().clone();
+
+        let file_ext = match path.extension().clone()
+            .and_then(|ext| ext.to_str())
+        {
+            Some(ext) => ext,
+            None => "jpg",
+        };
+
+
+        let new_file_name = match file_name
+            .and_then(|name| name.to_str())
+            .and_then(|name_str| name_str.split('.').next())
+        {
+            Some(name) => String::from(name) + "_1",
+            None => String::from("default_name"),
+        };
+
+        let mut new_path = path.clone();
+
+        new_path.set_file_name(new_file_name);
+        new_path.set_extension(file_ext);
+
         match decrypted_bytes {
             Ok(bytes) => {
-                let writing_result = ghost_text::write_bytes_to_file(&path, &bytes);
+                let writing_result = ghost_text::write_bytes_to_file(&new_path, &bytes);
 
                 match writing_result {
                     Ok(_) => unwrapped_ui.set_cloni_2("File decrypted sucesfully".into()),
@@ -220,6 +245,7 @@ fn main() -> Result<(), slint::PlatformError> {
 
 
     ui.on_exit(move || exit(0));
+
 
     ui.run() 
 }
