@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 use std::os::unix::fs::PermissionsExt;
 use std::fs::{File, OpenOptions, self};
+use std::path::PathBuf;
 use rand::{distributions::Alphanumeric, Rng, rngs::OsRng};
 
 use dirs::home_dir;
@@ -14,6 +15,9 @@ use crate::errors::EncryptorError;
 type Aes256CbcEnc = cbc::Encryptor<aes::Aes256>;
 type Aes256CbcDec = cbc::Decryptor<aes::Aes256>;
 type LibraryErrors = errors::LibraryErrors;
+
+
+use bytes::BytesMut;
 
 mod errors;
 
@@ -33,6 +37,7 @@ pub enum OperationType {
 #[derive(Clone,)]
 pub struct Secret {
     content: String,
+    binary_content: Vec<u8>,
     secret_key: String,
     operation_type: OperationType
 }
@@ -51,6 +56,7 @@ impl Secret {
 
         Self {
             content: String::new(),
+            binary_content: Vec::new(),
             secret_key: key,
             operation_type: op_type
         }
@@ -63,6 +69,17 @@ impl Secret {
             self.encrypt()
         } else if self.operation_type == OperationType::Decrypt {
             self.decrypt()
+        } else {
+            Err(EncryptorError::new(LibraryErrors::NoOperationTypeError))
+        }
+    }
+
+    pub fn generate_bytes(&mut self, content: Vec<u8>) -> Result<Vec<u8>, EncryptorError> {
+        self.binary_content = content;
+        if self.operation_type == OperationType::Encrypt {
+            self.encrypt_binary()
+        } else if self.operation_type == OperationType::Decrypt {
+            self.decrypt_binary()
         } else {
             Err(EncryptorError::new(LibraryErrors::NoOperationTypeError))
         }
@@ -92,11 +109,40 @@ impl Secret {
             return Err(EncryptorError::new(LibraryErrors::ValueError))
         }
 
-        let res = Aes256CbcDec::new(self.secret_key.as_bytes().into(), bytes[0..16].into())
+        let res = Aes256CbcDec::new(self.secret_key.as_bytes()
+            .into(), bytes[0..16]
+            .into())
             .decrypt_padded_vec_mut::<Pkcs7>(&bytes[16..]);
 
         let res = res.map_err(|_| EncryptorError::new(LibraryErrors::KeyError))?;
-        return Ok(String::from_utf8(res).map_err(|_| EncryptorError::new(LibraryErrors::UTF8Error))?)
+        Ok(String::from_utf8(res).map_err(|_| EncryptorError::new(LibraryErrors::UTF8Error))?)
+    }
+
+
+    fn encrypt_binary(&self) -> Result<Vec<u8>, EncryptorError> {
+        let iv_str = Self::random_generator(16);
+        let cipher = Aes256CbcEnc::new(self.secret_key.as_bytes()
+            .into(), iv_str.as_bytes()
+            .into())
+            .encrypt_padded_vec_mut::<Pkcs7>(&self.binary_content);
+
+        let mut buffer = BytesMut::with_capacity(iv_str.len() + cipher.len());
+        buffer.extend_from_slice(&iv_str.into_bytes());
+        buffer.extend_from_slice(&cipher);
+        Ok(buffer.to_vec())
+    }
+
+
+    fn decrypt_binary(&self) -> Result<Vec<u8>, EncryptorError> {
+        if self.binary_content.is_empty() || self.binary_content.len() < 16 {
+            return Err(EncryptorError::new(LibraryErrors::BinaryFileDecryptingError))
+        }
+
+        let iv = &self.binary_content[..16];
+        let cipher = Aes256CbcDec::new(self.secret_key.as_bytes().into(), iv.into())
+            .decrypt_padded_vec_mut::<Pkcs7>(&self.binary_content[16..])
+            .map_err(|_| EncryptorError::new(LibraryErrors::BinaryFileDecryptingError))?;
+        Ok(cipher)
     }
 
 
@@ -118,7 +164,7 @@ impl Secret {
 
 
 
-// Utilities
+// Auxiliary functions
 pub fn save_passkey_to_file(passkey: String) -> Result<(), EncryptorError> {
     if let Some(home_path) = home_dir() {
         // In a case of an accident to not blocking whole file-system.
@@ -128,7 +174,7 @@ pub fn save_passkey_to_file(passkey: String) -> Result<(), EncryptorError> {
 
             let mut file = file.map_err(|_| EncryptorError::new(LibraryErrors::PermissionError))?;
             file.write_all(passkey.as_bytes())
-                .map_err(|_| EncryptorError::new(LibraryErrors::FileError))?;
+                .map_err(|_| EncryptorError::new(LibraryErrors::KeyFileError))?;
 
             match file.sync_all() {
                 Ok(_) => {
@@ -139,13 +185,13 @@ pub fn save_passkey_to_file(passkey: String) -> Result<(), EncryptorError> {
                     fs::set_permissions(&file_path, perms)
                         .map_err(|_| EncryptorError::new(LibraryErrors::PermissionError))?;
                 },
-                Err(_) =>  return Err(EncryptorError::new(LibraryErrors::FileError))
+                Err(_) =>  return Err(EncryptorError::new(LibraryErrors::KeyFileError))
             }
         } else {
-            return Err(EncryptorError::new(LibraryErrors::FileNameError))
+            return Err(EncryptorError::new(LibraryErrors::KeyFileNameError))
         }
     } else {
-        return Err(EncryptorError::new(LibraryErrors::FileError))
+        return Err(EncryptorError::new(LibraryErrors::KeyFileError))
     }
     Ok(())
 }
@@ -165,4 +211,19 @@ pub fn read_passkey_from_file() -> Result<String, EncryptorError> {
         }
     }
     Err(EncryptorError::new(LibraryErrors::PermissionError))
+}
+
+
+pub fn read_file_to_bytes(file_path: &PathBuf) -> Result<Vec<u8>, EncryptorError> {
+    let mut file = File::open(file_path).map_err(|_| EncryptorError::new(LibraryErrors::BinaryFileReadError))?;
+    let mut content = Vec::new();
+    file.read_to_end(&mut content).map_err(|_| EncryptorError::new(LibraryErrors::BinaryFileReadError))?;
+    Ok(content)
+}
+
+
+pub fn write_bytes_to_file(file_path: &PathBuf, content: &[u8]) -> Result<(), EncryptorError> {
+    let mut file = File::create(file_path).map_err(|_| EncryptorError::new(LibraryErrors::BinaryFileWriteError))?;
+    file.write_all(content).map_err(|_| EncryptorError::new(LibraryErrors::BinaryFileWriteError))?;
+    Ok(())
 }

@@ -13,6 +13,8 @@ export component AppWindow inherits Window {
     width:660px;
 
     callback encode(string);
+    callback encrypt_file();
+    callback decrypt_file();
     callback decode(string);
     callback set_key_msg(string);
     callback exit();
@@ -43,7 +45,7 @@ export component AppWindow inherits Window {
 
             Text {
                 wrap: word-wrap;
-                text: "Usage:\n\n1. If using first time enter a new Security Key. Using default one is not secure!\n  → Security Key is saved unecrypted in home folder as .passkey file\n2. Press Encrypt Text, insert your text and encrypt it using AES-256-CBC\n3. Share encrypted message with someone with same Security key\n4. Decrypt it using - Decrypt Text - menu and enjoy privacy on social networks!";
+                text: "Usage:\n\n1. If using first time enter a new Security Key. Using default one is not secure!\n  → Security Key is saved unecrypted in home folder as .passkey file\n2. Press Encrypt Menu, insert your text and encrypt it using AES-256-CBC\n3. Share encrypted message with someone with same Security key\n4. Decrypt it using - Decrypt Menu - and enjoy privacy on social networks!";
                 horizontal-alignment: left;
                 font-size: 15px;
             }
@@ -60,7 +62,7 @@ export component AppWindow inherits Window {
                 spacing: 15px;
                     
                 Button {
-                    text: "Encrypt Text";
+                    text: "Encrypt Menu";
                     height: 40px;
                     primary: true;
                     clicked => {
@@ -69,7 +71,7 @@ export component AppWindow inherits Window {
                 }
 
                 Button {
-                    text: "Decrypt Text";
+                    text: "Decrypt Menu";
                     height: 40px;
                     clicked => {
                         root.current_view = Page.Decode;
@@ -163,15 +165,28 @@ export component AppWindow inherits Window {
                     
                 } 
             }
+            GridLayout {
+                spacing: 10px;
 
-            Button {
-                text: "Encrypt";
-                height: 40px;
-                primary: true;
-                clicked => {
-                    root.encode(encoding-field.text);
+                Button {
+                    text: "Encrypt Text";
+                    height: 40px;
+                    primary: true;
+                    clicked => {
+                        root.encode(encoding-field.text);
+                    }
+                }
+
+                Button {
+                    text: "Encrypt File";
+                    height: 40px;
+                    clicked => {
+                        root.encrypt_file();
+                    }
                 }
             }
+
+
 
             Button {
                 text: "Menu";
@@ -245,15 +260,28 @@ export component AppWindow inherits Window {
                 } 
             }
 
-            Button {
-                text: "Decrypt";
-                primary: true;
-                height: 40px;
-                clicked => {
-                    root.decode(encoding-field_2.text);
+            GridLayout {
+                spacing: 10px;
+
+                Button {
+                    text: "Decrypt Text";
+                    primary: true;
+                    height: 40px;
+                    clicked => {
+                        root.decode(encoding-field_2.text);
+                    }
+                }
+
+                Button {
+                    text: "Decrypt File";
+                    height: 40px;
+                    clicked => {
+                        root.decrypt_file();
+                    }
                 }
             }
 
+            
             Button {
                 text: "Menu";
                 height: 40px;
