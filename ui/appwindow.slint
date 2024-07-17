@@ -1,4 +1,4 @@
-import { Button, VerticalBox, TextEdit, LineEdit } from "std-widgets.slint";
+import { Button, VerticalBox, TextEdit, LineEdit, HorizontalBox } from "std-widgets.slint";
 
 enum Page {
     Menu,
@@ -10,7 +10,8 @@ enum Page {
 
 export component AppWindow inherits Window {
     title: "Ghost Text";
-    width:660px;
+    width: 820px;
+    height: 600px;
 
     callback encode(string);
     callback encrypt_file();
@@ -33,77 +34,104 @@ export component AppWindow inherits Window {
     
     
     VerticalBox {
-        padding-left: 20px;
-        padding-right: 20px;
-
+        alignment: center;
         if (current_view == Page.Menu) : VerticalBox {
-            Text {
-                text: "Protect your texts online";
-                horizontal-alignment: center;
-                font-size: 30px;
+            VerticalBox {
+                    padding-left: 40px;
+                    padding-right: 40px;
+                Text {
+                    
+                    text: "Text and File Encryption - Decryption";
+                    horizontal-alignment: center;
+                    font-size: 26px;
+                }
+
+                Text {
+                    wrap: word-wrap;
+                    text: "Usage:\n\n1.If this is your first time using the application, enter a new Security Key.\n  → Using the default key is not secure!\n  → The Security Key is saved as plain text in the home folder as a .passkey file.\n2.Go to the Encrypt Menu, insert your text or a file, and encrypt it.\n3.Share the encrypted message/file with someone who has the same Security Key.\n  → Don't share the security key with anybody who is not supposed to decrypt texts and files.\n4.Decrypt the message/file using the Decrypt Menu and enjoy privacy on social networks!";
+                    horizontal-alignment: left;
+                    font-size: 14px;
+                }
+
+                Text {
+                    wrap: word-wrap;
+                    text: main_error_field;
+                    horizontal-alignment: left;
+                    font-size: 15px;
+                    color: orange;
+                    
+                }
             }
 
-            Text {
-                wrap: word-wrap;
-                text: "Usage:\n\n1. If using first time enter a new Security Key. Using default one is not secure!\n  → Security Key is saved unecrypted in home folder as .passkey file\n2. Press Encrypt Menu, insert your text and encrypt it using AES-256-CBC\n3. Share encrypted message with someone with same Security key\n4. Decrypt it using - Decrypt Menu - and enjoy privacy on social networks!";
-                horizontal-alignment: left;
-                font-size: 15px;
-            }
-
-            Text {
-                wrap: word-wrap;
-                text: main_error_field;
-                horizontal-alignment: left;
-                font-size: 15px;
-                color: orange;
+            VerticalBox {
+                height: 30px;
             }
 
             VerticalBox {
                 spacing: 15px;
+                
+                HorizontalBox {
+                    alignment: center;
+                    Button {
                     
-                Button {
-                    text: "Encrypt Menu";
-                    height: 40px;
-                    primary: true;
-                    clicked => {
-                        root.current_view = Page.Encode;
-                    }     
-                }
-
-                Button {
-                    text: "Decrypt Menu";
-                    height: 40px;
-                    clicked => {
-                        root.current_view = Page.Decode;
+                        text: "Encrypt Menu";
+                        height: 40px;
+                        width: 600px;
+                        primary: true;
+                        clicked => {
+                            root.current_view = Page.Encode;
+                        }     
                     }
-                    
                 }
 
-                Button {
-                    text: "Enter Key";
-                    height: 40px;
-                    clicked => {
-                        root.current_view = Page.Key;
+                HorizontalBox {
+                    alignment: center;
+                    Button {
+                        text: "Decrypt Menu";
+                        height: 40px;
+                        width: 600px;
+                        clicked => {
+                            root.current_view = Page.Decode;
+                        }
+                        
                     }
-                    
                 }
 
-                Button {
-                    text: "Exit";
-                    height: 40px;
-                    clicked => {
-                        root.exit()
+                HorizontalBox {
+                    alignment: center;
+                    Button {
+                        text: "Enter Key";
+                        height: 40px;
+                        width: 600px;
+                        clicked => {
+                            root.current_view = Page.Key;
+                        }
+                        
+                    }
+                }
+
+                HorizontalBox {
+                    alignment: center;
+                    Button {
+                        text: "Exit";
+                        height: 40px;
+                        width: 600px;
+                        clicked => {
+                            root.exit()
+                        }
                     }
                 }
             }
 
-            Text {
-                text: "Suomi422 ❤";
-                horizontal-alignment: right;
-                font-size: 8px;
+            HorizontalBox {
+                alignment: end;
+                padding-right: 30px;
+                Text {
+                    text: "Made with ❤ by Suomi422";
+                    font-size: 12px;
+                }
             }
         }
-
 
 
         if (current_view == Page.Encode) : VerticalBox {
@@ -115,88 +143,106 @@ export component AppWindow inherits Window {
                 font-size: 30px;
             }
 
-            Rectangle {
-                width: root.width / 1.115;
-                height: root.height / 4.7;
-        
-        
-                encoding_field := TextEdit {
+            HorizontalBox {
+                alignment: center;
+
+                Rectangle {
+                    width: 740px;
+                    height: 150px;
+            
+            
+                    encoding_field := TextEdit {
+                        font-size: 15px;
+                        width: parent.width;
+                        height: parent.height;
+                        text: "";
+                    }
+            
+                    Text {
+                        text: "Enter text here ...";
+                        color: #888;
+                        visible: encoding_field.text == "";
+                        vertical-alignment: center;
+                        horizontal-alignment: left;
+                    }
+                }
+            }
+
+            HorizontalBox {
+                alignment: center;
+
+                decoding_field := TextEdit {
                     font-size: 15px;
-                    width: parent.width;
-                    height: parent.height;
-                    text: "";
+                    width: 740px;
+                    height: 150px;
+                    text: root.cloni;
+                    read-only: true;
                 }
-        
-                Text {
-                    text: "Enter text here...";
-                    color: #888;
-                    visible: encoding_field.text == "";
-                    vertical-alignment: center;
-                    horizontal-alignment: left;
-                }
-            }
-
-            decoding_field := TextEdit {
-                font-size: 15px;
-                width: root.width / 1.115;
-                height: root.height / 4.7;
-                text: root.cloni;
-                read-only: true;
             }
 
             GridLayout {
-                spacing: 10px;
-                Button {
-                    text: "Copy";
-                    height: 40px;
-                    clicked => {
-                        decoding-field.select-all();
-                        decoding-field.copy();
+                HorizontalBox {
+                    alignment: center;
+
+                    Button {
+                        text: "Copy";
+                        width: 350px;
+                        height: 40px;
+                        clicked => {
+                            decoding-field.select-all();
+                            decoding-field.copy();
+                        }
+                    }
+            
+                    Button {
+                        text: "Paste";
+                        width: 350px;
+                        height: 40px;
+                        clicked => {
+                            encoding-field.select-all();
+                            encoding-field.paste();
+                        }
+                        
                     }
                 }
-        
-                Button {
-                    text: "Paste";
-                    height: 40px;
-                    clicked => {
-                        encoding-field.select-all();
-                        encoding-field.paste();
-                    }
-                    
-                } 
             }
+
             GridLayout {
-                spacing: 10px;
-
-                Button {
-                    text: "Encrypt Text";
-                    height: 40px;
-                    primary: true;
-                    clicked => {
-                        root.encode(encoding-field.text);
+                HorizontalBox {
+                    alignment: center;
+                    Button {
+                        text: "Encrypt Text";
+                        width: 350px;
+                        height: 40px;
+                        primary: true;
+                        clicked => {
+                            root.encode(encoding-field.text);
+                        }
                     }
-                }
 
-                Button {
-                    text: "Encrypt File";
-                    height: 40px;
-                    clicked => {
-                        root.encrypt_file();
+                    Button {
+                        text: "Encrypt File";
+                        width: 350px;
+                        height: 40px;
+                        clicked => {
+                            root.encrypt_file();
+                        }
                     }
                 }
             }
 
-
-
-            Button {
-                text: "Menu";
-                height: 40px;
-                clicked => {
-                    root.cloni = "";
-                    root.current_view = Page.Menu;
+            HorizontalBox {
+                alignment: center;
+                Button {
+                    text: "Menu";
+                    width: 600px;
+                    height: 40px;
+                    clicked => {
+                        root.cloni = "";
+                        root.current_view = Page.Menu;
+                    }
                 }
             }
-
         }
 
 
@@ -208,88 +254,106 @@ export component AppWindow inherits Window {
                 font-size: 30px;
             }
 
+            HorizontalBox {
+                alignment: center;
 
-            Rectangle {
-                width: root.width / 1.115;
-                height: root.height / 4.7;
-        
-                encoding_field_2 := TextEdit {
-                    font-size: 15px;
-                    width: root.width / 1.115;
-                    height: root.height / 4.7;
-                    text: "";
-
-                }
-        
-                Text {
-                    text: "Enter text here...";
-                    color: #888;
-                    visible: encoding_field_2.text == "";
-                    vertical-alignment: center;
-                    horizontal-alignment: left;
-                }
-            }
-
-            decoding_field_2 := TextEdit {
-                font-size: 15px;
-                width: root.width / 1.115;
-                height: root.height / 4.7;
-                read-only: true;
-                text: root.cloni_2;
-            }
-
-            GridLayout {
-                spacing: 10px;
-                Button {
-                    text: "Copy";
-                    height: 40px;
-                    clicked => {
-                        decoding-field_2.select-all();
-                        decoding-field_2.copy();
-                    }
-                }
-        
-                Button {
-                    text: "Paste";
-                    height: 40px;
-                    clicked => {
-                        encoding-field_2.select-all();
-                        encoding-field_2.paste();
-                    }
-                    
-                } 
-            }
-
-            GridLayout {
-                spacing: 10px;
-
-                Button {
-                    text: "Decrypt Text";
-                    primary: true;
-                    height: 40px;
-                    clicked => {
-                        root.decode(encoding-field_2.text);
-                    }
-                }
-
-                Button {
-                    text: "Decrypt File";
-                    height: 40px;
-                    clicked => {
-                        root.decrypt_file();
-                    }
-                }
-            }
-
+                Rectangle {
+                    width: 740px;
+                    height: 150px;
             
-            Button {
-                text: "Menu";
-                height: 40px;
-                clicked => {
-                    root.cloni_2 = "";
-                    root.current_view = Page.Menu;
+                    encoding_field_2 := TextEdit {
+                        font-size: 15px;
+                        width: parent.width;
+                        height: parent.height;
+                        text: "";
+
+                    }
+            
+                    Text {
+                        text: "Enter text here ...";
+                        color: #888;
+                        visible: encoding_field_2.text == "";
+                        vertical-alignment: center;
+                        horizontal-alignment: left;
+                    }
                 }
-                
+            }
+
+            HorizontalBox {
+                alignment: center;
+
+                decoding_field_2 := TextEdit {
+                    font-size: 15px;
+                    width: 740px;
+                    height: 150px;
+                    read-only: true;
+                    text: root.cloni_2;
+                }
+            }
+
+            GridLayout {
+                HorizontalBox {
+                    alignment: center;
+
+                    Button {
+                        text: "Copy";
+                        width: 350px;
+                        height: 40px;
+                        clicked => {
+                            decoding-field_2.select-all();
+                            decoding-field_2.copy();
+                        }
+                    }
+            
+                    Button {
+                        text: "Paste";
+                        width: 350px;
+                        height: 40px;
+                        clicked => {
+                            encoding-field_2.select-all();
+                            encoding-field_2.paste();
+                        }
+                        
+                    } 
+                }
+            }
+
+            GridLayout {
+                HorizontalBox {
+                    alignment: center;
+
+                    Button {
+                        text: "Decrypt Text";
+                        primary: true;
+                        width: 350px;
+                        height: 40px;
+                        clicked => {
+                            root.decode(encoding-field_2.text);
+                        }
+                    }
+
+                    Button {
+                        text: "Decrypt File";
+                        width: 350px;
+                        height: 40px;
+                        clicked => {
+                            root.decrypt_file();
+                        }
+                    }
+                }
+            }
+            
+            HorizontalBox {
+                alignment: center;
+                Button {
+                    text: "Menu";
+                    width: 600px;
+                    height: 40px;
+                    clicked => {
+                        root.cloni_2 = "";
+                        root.current_view = Page.Menu;
+                    }
+                }
             }
         }
 
@@ -303,31 +367,42 @@ export component AppWindow inherits Window {
                 font-size: 30px;
             }
 
-            Text {
-                text: "Key must have exactly 32 characters. If less is inputed, rest will be generated randomly. If more, rest is cutted off.";
-                horizontal-alignment: center;
-                font-size: 15px;
-                wrap: word-wrap;
-            }
-            
-            key_field := LineEdit {
-                horizontal-alignment: center;
-                font-size: 20px;
-                width: root.width / 1.115;
-                height: root.height / 8;
-                text: "";
-
-            }
-
-            Button {
-                text: "Register";
-                height: 40px;
-                primary: true;
-                clicked => {
-                    root.set_key_msg(key-field.text);
+            HorizontalBox {
+                alignment: center;
+                Text {
+                    width: 500px;
+                    text: "Key must have exactly 32 characters. If less is inputed, rest will be generated randomly. If more, rest is cutted off.";
+                    horizontal-alignment: center;
+                    font-size: 15px;
+                    wrap: word-wrap;
                 }
             }
-            
+
+            HorizontalBox {
+                alignment: center;
+                key_field := LineEdit {
+                    horizontal-alignment: center;
+                    font-size: 20px;
+                    width: 500px;
+                    height: 50px;
+                    text: "";
+
+                }
+            }
+
+            HorizontalBox {
+                alignment: center;
+                Button {
+                    text: "Register";
+                    height: 40px;
+                    width: 500px;
+                    primary: true;
+                    clicked => {
+                        root.set_key_msg(key-field.text);
+                    }
+                }
+            }
+                
             VerticalBox {
                 height: 10px;
             }
@@ -338,31 +413,44 @@ export component AppWindow inherits Window {
                 font-size: 20px;
             }
 
-            keyField := LineEdit {
-                text: key_value;
-                horizontal-alignment: center;
-                font-size: 15px;
-                read-only: true;
-            }
-
-            Button {
-                text: "Copy";
-                height: 40px;
-                primary: true;
-                clicked => {
-                    keyField.select-all();
-                    keyField.copy();
+            HorizontalBox {
+                alignment: center;
+                keyField := LineEdit {
+                    text: key_value;
+                    width: 500px;
+                    height: 50px;
+                    horizontal-alignment: center;
+                    font-size: 15px;
+                    read-only: true;
                 }
             }
 
-            Button {
-                text: "Menu";
-                height: 40px;
-                clicked => {
-                    key_message = "Current Key";
-                    root.current_view = Page.Menu;
+            HorizontalBox {
+                alignment: center;
+                Button {
+                    text: "Copy to clipboard";
+                    width: 500px;
+                    height: 40px;
+                    primary: true;
+                    clicked => {
+                        keyField.select-all();
+                        keyField.copy();
+                    }
                 }
-                
+            }
+
+            HorizontalBox {
+                alignment: center;
+                Button {
+                    text: "Menu";
+                    width: 300px;
+                    height: 40px;
+                    clicked => {
+                        key_message = "Current Key";
+                        root.current_view = Page.Menu;
+                    }
+                    
+                }
             }
         }
     }
