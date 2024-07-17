@@ -1,15 +1,17 @@
+use rand::Rng;
 use std::{cell::RefCell, process::exit, rc::Rc};
 use ghost_text::{OperationType, Secret};
 use native_dialog::{FileDialog, MessageDialog, MessageType};
+
+use errors::UIErrorEnum;
+use errors::UIError;
+
+mod errors;
 
 
 slint::include_modules!();
 
 static DEFAULT_PASS: &str = "01234567012345670123456701234567";
-static FATAL_MESSAGE: &str = "FATAL: User interface was not found";
-static FIRST_TIME_MESSAGE: &str = "WARNING: Wasn't able to read Security Key file. If using first time please change Security Key in - Enter Key - menu. Using default Security key for now.";
-static PASSKEY_FILE_MESSAGE: &str = "WARNING: Wasn't able to save Security Key! Please make sure software has access to home folder. Using default Security key for now.";
-static PATH_MESSAGE: &str = "Warning: Wasn't able to get file path";
 static FILE_ENCRYPT_EXTENSION: &str = "enc";
 
 
@@ -28,13 +30,13 @@ fn main() -> Result<(), slint::PlatformError> {
     let key = match key {
         Ok(key) => key,
         Err(_) => { 
-            ui.set_main_error_field(FIRST_TIME_MESSAGE.into());
+            ui.set_main_error_field(UIError::new(UIErrorEnum::InitialError).error_msg.into());
             
             let password_saving_result = ghost_text::save_passkey_to_file(String::from(DEFAULT_PASS));
 
             let _ = match password_saving_result {
                 Ok(()) => (),
-                Err(_) =>  ui.set_main_error_field(PASSKEY_FILE_MESSAGE.into()),
+                Err(_) =>  ui.set_main_error_field(UIError::new(UIErrorEnum::PasskeyFileError).error_msg.into()),
             };
             
             String::from(DEFAULT_PASS)
@@ -61,14 +63,14 @@ fn main() -> Result<(), slint::PlatformError> {
                 if let Some(ui) = ui_handle.upgrade() {
                     ui.set_cloni(val.into());
                 } else {
-                    panic!("{}", FATAL_MESSAGE);
+                    panic!("{}", UIError::new(UIErrorEnum::DeathError).error_msg);
                 }
             },
             Err(error) => if let Some(ui) = ui_handle.upgrade() {
                 let error_msg = error.error_msg;
                 ui.set_cloni(error_msg.into());
             } else {
-                panic!("{}", FATAL_MESSAGE);
+                panic!("{}", UIError::new(UIErrorEnum::DeathError).error_msg);
             }
         };
     });
@@ -82,10 +84,10 @@ fn main() -> Result<(), slint::PlatformError> {
         if let Some(ui) = ui_handle2.upgrade() {
             match decoded {
                 Ok(decoded_string) => ui.set_cloni_2(decoded_string.into()),
-                Err(error) => ui.set_cloni_2(format!("[ ERR ] Decryptor Error: {}", error.error_msg).into()),
+                Err(error) => ui.set_cloni_2(format!("{} {}", UIError::new(UIErrorEnum::DecryptorError).error_msg, error.error_msg).into()),
             }
         } else {
-            panic!("{}", FATAL_MESSAGE);
+            panic!("{}", UIError::new(UIErrorEnum::DeathError).error_msg);
         }
     });
 
@@ -110,7 +112,7 @@ fn main() -> Result<(), slint::PlatformError> {
                     ui.set_main_error_field("".into());
                 }
             } else {
-                panic!("{}", FATAL_MESSAGE);
+                panic!("{}", UIError::new(UIErrorEnum::DeathError).error_msg);
             }
     });
 
@@ -119,33 +121,32 @@ fn main() -> Result<(), slint::PlatformError> {
     ui.on_encrypt_file(move || {
         let unwrapped_ui = match ui_handle4.upgrade() {
             Some(ui) => ui,
-            None => panic!("{}", FATAL_MESSAGE)
+            None => panic!("{}", UIError::new(UIErrorEnum::DeathError).error_msg)
         };
 
         let path = FileDialog::new()
         .set_location("~/")
         .set_filename("")
-        .add_filter("JPEG Image", &["jpg", "jpeg"])
-        .add_filter("PNG Image", &["png"])
+        .add_filter("Any", &["*"])
         .show_open_single_file()
         .unwrap();
 
         let mut path = match path {
             Some(path) => path,
             None => {
-                unwrapped_ui.set_cloni(PATH_MESSAGE.into());
+                unwrapped_ui.set_cloni(UIError::new(UIErrorEnum::PathError).error_msg.into());
                 return
             },
         };
 
         let confirmation_dialog = MessageDialog::new()
             .set_type(MessageType::Info)
-            .set_title("Do you want to encrypt this file?")
+            .set_title("Do you want to encrypt the file?")
             .set_text(&format!("{:#?}", path))
             .show_confirm();
 
         if confirmation_dialog.is_err() {
-            panic!("{}", FATAL_MESSAGE)
+            panic!("{}", UIError::new(UIErrorEnum::DeathError).error_msg)
             
         }
 
@@ -171,7 +172,7 @@ fn main() -> Result<(), slint::PlatformError> {
     ui.on_decrypt_file(move || {
         let unwrapped_ui = match ui_handle5.upgrade() {
             Some(ui) => ui,
-            None => panic!("{}", FATAL_MESSAGE)
+            None => panic!("{}", UIError::new(UIErrorEnum::DeathError).error_msg)
         };
 
         let path = FileDialog::new()
@@ -184,19 +185,19 @@ fn main() -> Result<(), slint::PlatformError> {
         let mut path = match path {
             Some(path) => path,
             None => {
-                unwrapped_ui.set_cloni_2(PATH_MESSAGE.into());
+                unwrapped_ui.set_cloni_2(UIError::new(UIErrorEnum::PathError).error_msg.into());
                 return
             },
         };
 
         let confirmation_dialog = MessageDialog::new()
             .set_type(MessageType::Info)
-            .set_title("Do you want to decrypt this file?")
+            .set_title("Do you want to decrypt the file?")
             .set_text(&format!("{:#?}", path))
             .show_confirm();
 
         if confirmation_dialog.is_err() {
-            panic!("{}", FATAL_MESSAGE)
+            panic!("{}", UIError::new(UIErrorEnum::DeathError).error_msg)
             
         }
 
@@ -213,7 +214,7 @@ fn main() -> Result<(), slint::PlatformError> {
             .and_then(|ext| ext.to_str())
         {
             Some(ext) => ext,
-            None => "jpg",
+            None => "",
         };
 
 
@@ -221,8 +222,11 @@ fn main() -> Result<(), slint::PlatformError> {
             .and_then(|name| name.to_str())
             .and_then(|name_str| name_str.split('.').next())
         {
-            Some(name) => String::from(name) + "_1",
-            None => String::from("default_name"),
+            Some(name) => {
+                let mut rng = rand::thread_rng();
+                let random_int_string = rng.gen_range(1..999).to_string();
+                String::from(name) + "_" + &random_int_string},
+            None => String::from("decrypted_file_name_unknown"),
         };
 
         let mut new_path = path.clone();
