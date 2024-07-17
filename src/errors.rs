@@ -15,6 +15,16 @@ pub enum LibraryErrors {
     BinaryFileWriteError,
 }
 
+#[allow(dead_code)]
+#[derive(Debug)]
+pub enum UIErrorEnum {
+    DeathError,
+    InitialError,
+    PasskeyFileError,
+    PathError,
+    DecryptorError
+}
+
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -24,6 +34,14 @@ pub struct EncryptorError {
 }
 
 
+#[allow(dead_code)]
+#[derive(Debug)]
+pub struct UIError {
+    code: UIErrorEnum,
+    pub error_msg: String,
+}
+
+#[allow(dead_code)] // Not dead but called from another place
 impl EncryptorError {
     pub fn new(code: LibraryErrors) -> EncryptorError {
         let error_type = match code {
@@ -48,9 +66,34 @@ impl EncryptorError {
     }
 }
 
+#[allow(dead_code)] // Not dead but called from another place
+impl UIError {
+    pub fn new(code: UIErrorEnum) -> UIError {
+        let error_type = match code {
+            UIErrorEnum::DeathError => String::from("[ ERR ] User interface was not found"),
+            UIErrorEnum::DecryptorError => String::from("[ ERR ] "), // ValueError goes here appended
+            UIErrorEnum::InitialError => String::from("→ Was not able to read Security Key file. If using first time please change Security Key in - Enter Key - menu. Using default Security key for now"),
+            UIErrorEnum::PasskeyFileError => String::from("[ WARN ] Wasn't able to save Security Key! Please make sure software has access to home folder. Using default Security key for now"),
+            UIErrorEnum::PathError => String::from("[ WARN ] Wasn't able to get file path"),
+        };
+
+        UIError {
+            code,
+            error_msg:error_type
+        }
+    }
+}
+
 
 impl std::fmt::Display for EncryptorError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "Encryptor error occured! Details → {}", self.error_msg)
+    }
+}
+
+
+impl std::fmt::Display for UIError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self.error_msg)
     }
 }
