@@ -165,6 +165,7 @@ impl Secret {
 
 
 // Auxiliary functions
+// --------------------------------------------------------------------------------------------------------------------
 pub fn save_passkey_to_file(passkey: String) -> Result<(), EncryptorError> {
     if let Some(home_path) = home_dir() {
         // In a case of an accident to not blocking whole file-system.
