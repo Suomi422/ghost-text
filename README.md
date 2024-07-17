@@ -1,23 +1,22 @@
 # Ghost Text
-## Be like a ghost online
+## Be like a ghost online!
 
-Nothing is "free" these days in online space. Do you using some "ordinary" social networks to communicate with friends/family free? No because you probably paying with your:
-1. Connection (site is going popular)
-2. Caution (You watching what the site decide you to watch)
-3. Privacy (site is probably harvesting some informations about you)
+Nothing is "free" these days in online space. Do you using some of the famous social networks to communicate with friends/family? Well, congratulation, you pay with your personal data and privacy!
 
-This tool is created in intend of lowering the amount of data you share with social network platform while utilizing network resources without loosing flexibility to use the network. 
-In easy words: Let's use resources and pay nothing. Because it's time to revenge that middle finger pointing to us.
+Did you have a moment when you would like to use a privacy-frendly social network, but realized nobody of your friends is there? Inconvenient indead.
+This encryption software is created in intend of blocking the amount of data you share with social network platform while perserve flexibility of usege of the social network.
 
-Tool has simple GUI and needs a "Secret Key" to encrypt/decrypt messages using AES-256 encryption provided by Crates inside of source files.
-Mainly created for Linux, but will work also in Mac. Because Nobody cares about Windows.
+In other words: Let's use resources and benefits of these social networks and pay nothing, not even a byte of your privacy. Because i think it is a good time to stop getting piss on our heads and be told it's raining.
+
+Tool has simple GUI wrote in Slint and needs a "Secret Key" to encrypt/decrypt messages using AES-256 encryption provided by encryption crates inside of source files.
+Mainly created for Linux, but will work also in Mac. Because Nobody cool boys do not use Windows and also libraries used in this code are not compatible with Windows directory trees.
 
 
-Build Instructions:
-1. Firsty download and install Rust (if you do not have it) using official [Rust Homepage](https://www.rust-lang.org/tools/install).
-2. Clone code from this repository using `git clone` command.
+Build from source instructions:
+1. Firsty download and install Rust (if you do not have it already) using official [Rust Homepage](https://www.rust-lang.org/tools/install).
+2. Clone code from this repository using command `git clone` + repository URL.
 3. Open terminal in the cloned directory (name: ghost-text)
-4. Build project using the command bellow (This will build software as "Release")
+4. Build project using the command bellow (This will build software as "Release" version)
    ```
    cargo build --release
    ```
@@ -28,14 +27,19 @@ After that executable file will be located in `target/release` directory of the 
    ```
    cargo run
    ```
+for convenience. This wont build anything, but just execute the code.
 
 
 ### Pre-built version can be executed as bellow
-
+1. Firsty download released binary file from this repository
+2. Open terminal in the directory where you downloaded the file
+3. Execute commands bellow:
    ```
    chmod u+x GhostText
    ./GhostText 
    ```
 
 
-[Usage Example.webm](https://github.com/Suomi422/ghost-text/assets/170992784/8f73ec3d-bbc9-4580-b3f1-90e64d7c7349)
+
+[Sample Video]https://github.com/user-attachments/assets/ec8b203c-808b-4144-b711-b65a04759a14
+
